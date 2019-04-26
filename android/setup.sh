@@ -21,6 +21,11 @@ set -o nounset
 
 IFS=$'\n\t'
 
+echo "[*] creating `brains` directory"
+if [ ! -d brains ]; then
+  mkdir brains
+fi
+
 echo "[*] installing required dependencies..."
 apt update -yq && \
     apt install --no-install-recommends -yq \
@@ -39,11 +44,11 @@ echo "[*] project bootstrap finished"
 read -r -p "Want to set up your credentials now? [y/N] " cred_setup
 if [[ "$cred_setup" =~ ^([yY][eE][sS]|[yY])+$ ]]
 then
-    read -r -p "client_id: " client_id
-    read -r -p "client_secret: " client_secret
-    read -r -p "username: " username
-    read -r -p "password: " password
-    read -r -p "user_agent: " user_agent
+    read -r -p "[:] client_id: " client_id
+    read -r -p "[:] client_secret: " client_secret
+    read -r -p "[:] username: " username
+    read -r -p "[:] password: " password
+    read -r -p "[:] user_agent: " user_agent
     # creating a .tmp file always
     # we won't clubber the original file even if sed somehow fails
     sed -e "s/REDDIT_CLIENT_ID/${client_id}/g" reddit.py > reddit.py.tmp && mv reddit.py.tmp reddit.py
@@ -51,6 +56,7 @@ then
     sed -e "s/REDDIT_USERNAME/${username}/g" reddit.py > reddit.py.tmp && mv reddit.py.tmp reddit.py
     sed -e "s/REDDIT_PASSWORD/${password}/g" reddit.py > reddit.py.tmp && mv reddit.py.tmp reddit.py
     sed -e "s/REDDIT_USER_AGENT/${user_agent}/g" reddit.py > reddit.py.tmp && mv reddit.py.tmp reddit.py
+    echo "[*] Setup completed. Run the bot using `python2 run.py` to double check your credentials check the top of `nano reddit.py`."
 else
-    echo "Please setup your credentials in reddit.py using `nano reddit.py` then run the bot using `python2 run.py`"
+    echo "[!] Please setup your credentials in reddit.py using `nano reddit.py` then run the bot using `python2 run.py`"
 fi
