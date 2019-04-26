@@ -13,11 +13,11 @@ from nltk.corpus import wordnet as wn
 from utils import DB_DIR
 
 
-  api = praw.Reddit(client_id='REDDIT_CLIENT_ID',
-                    client_secret='REDDIT_SECRET',
-                    password=.'REDDIT_PASSWORD',
-                    user_agent='REDDIT_USER_AGENT',
-                    username='REDDIT_USERNAME')
+api = praw.Reddit(client_id='REDDIT_CLIENT_ID',
+                  client_secret='REDDIT_SECRET',
+                  password='REDDIT_PASSWORD',
+                  user_agent='REDDIT_USER_AGENT',
+                  username='REDDIT_USERNAME')
 
 
 def submission_timespan():
