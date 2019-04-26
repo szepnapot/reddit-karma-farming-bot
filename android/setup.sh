@@ -20,23 +20,20 @@ set -o pipefail
 set -o nounset
 
 IFS=$'\n\t'
-SRC_DIR="rkfb"
-
-git clone https://github.com/MrPowerScripts/reddit-karma-farming-bot.git ${SRC_DIR}
-cd ${SRC_DIR}/android
 
 echo "[*] installing required dependencies..."
 apt update -yq && \
-    apt install --no-install-recommends -yq nano \
+    apt install --no-install-recommends -yq \
+                clang \
+                nano \
                 python2 \
                 python2-dev \
-                python-setuptools \
                 sqlite \
-                libsqllite-dev \
+                libsqlite-dev \
                 libffi-dev && \
     apt upgrade -y && \
     apt autoremove -y
-python2 install -r requirements.txt
+pip2 install --upgrade pip -r requirements.txt
 
 echo "[*] project bootstrap finished"
 read -r -p "Want to set up your credentials now? [y/N] " cred_setup
@@ -47,6 +44,8 @@ then
     read -r -p "username: " username
     read -r -p "password: " password
     read -r -p "user_agent: " user_agent
+    # creating a .tmp file always
+    # we won't clubber the original file even if sed somehow fails
     sed -e "s/REDDIT_CLIENT_ID/${client_id}/g" reddit.py > reddit.py.tmp && mv reddit.py.tmp reddit.py
     sed -e "s/REDDIT_CLIENT_SECRET/${client_secret}/g" reddit.py > reddit.py.tmp && mv reddit.py.tmp reddit.py
     sed -e "s/REDDIT_USERNAME/${username}/g" reddit.py > reddit.py.tmp && mv reddit.py.tmp reddit.py
@@ -55,5 +54,3 @@ then
 else
     echo "Please setup your credentials in reddit.py using `nano reddit.py` then run the bot using `python2 run.py`"
 fi
-
-
