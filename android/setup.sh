@@ -42,11 +42,11 @@ then
     read -r -p "[:] username: " username
     read -r -p "[:] password: " password
     read -r -p "[:] user_agent: " user_agent
-    sedeasy 'REDDIT_CLIENT_ID' client_id reddit.py
-    sedeasy 'REDDIT_SECRET' client_secret reddit.py
-    sedeasy 'REDDIT_USERNAME' username reddit.py
-    sedeasy 'REDDIT_PASSWORD' password reddit.py
-    sedeasy 'REDDIT_USER_AGENT' user_agent reddit.py
+    sedeasy 'REDDIT_CLIENT_ID' ${client_id} reddit.py
+    sedeasy 'REDDIT_SECRET' ${client_secret} reddit.py
+    sedeasy 'REDDIT_USERNAME' ${username} reddit.py
+    sedeasy 'REDDIT_PASSWORD' ${password} reddit.py
+    sedeasy 'REDDIT_USER_AGENT' ${user_agent} reddit.py
     echo "[*] Setup completed. Run the bot using 'python2 run.py' to double check your credentials check the top of 'nano reddit.py'."
 else
     echo "[!] Please setup your credentials in reddit.py using 'nano reddit.py' then run the bot using 'python2 run.py'"
