@@ -23,7 +23,7 @@ try:
     if not check_internet():
         log.error("internet check failed, do we have network?")
     ip = get_public_ip()
-    log.info("My public IP address is:", ip)
+    log.info("My public IP address is: {}".format(ip))
 except Exception as e:
     log.error("counld not check external ip")
 
