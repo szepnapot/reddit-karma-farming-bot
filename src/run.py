@@ -1,64 +1,88 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import praw
 import reddit
 import os
-from utils import bytesto, countdown, prob, MAIN_DB
+from utils import (
+    bytesto,
+    countdown,
+    prob,
+    MAIN_DB,
+    PROBABILITIES,
+    get_public_ip,
+    check_internet,
+    MAIN_DB_MIN_SIZE,
+    get_seconds_to_wait,
+)
 from learn import learn
 from logger import log
 from requests import get
 
 try:
-  ip = get('https://api.ipify.org').text
-  print 'My public IP address is:', ip
+    if not check_internet():
+        log.error("internet check failed, do we have network?")
+    ip = get_public_ip()
+    log.info("My public IP address is:", ip)
 except Exception as e:
-  print "counld not check external ip"
+    log.error("counld not check external ip")
 
-        
-limit = 52428800
-log.info('------------new bot run--------------')
+
+RATE_LIMIT = 0
+NEED_TO_WAIT = 0
+log.info("------------new bot run--------------")
 log.info("user is " + str(reddit.api.user.me()))
 
-if __name__ == '__main__':
+reddit_bot = {
+    "reply": (reddit.random_reply, PROBABILITIES["REPLY"]),
+    "submit": (reddit.random_submission, PROBABILITIES["SUBMISSION"]),
+    "delete": (reddit.delete_comments, PROBABILITIES["DELETE"]),
+}
 
-    log.info('db size size to start replying:' + str(bytesto(limit, 'm')))
+
+if __name__ == "__main__":
+    log.info("db size size to start replying:" + str(bytesto(MAIN_DB_MIN_SIZE, "m")))
     while True:
 
-      if os.path.isfile(MAIN_DB):
-        size = os.path.getsize(MAIN_DB)
-        log.info('db size: ' + str(bytesto(size, 'm')))
-      else:
-        size = 0
-      
-      if size < limit: # learn faster early on
-        log.info('fast learning')
-        learn()
-        try:
-          log.info('new db size: ' + str(bytesto(os.path.getsize(MAIN_DB), 'm')))
-        except:
-          pass
+        if os.path.isfile(MAIN_DB):
+            size = os.path.getsize(MAIN_DB)
+            log.info("db size: " + str(bytesto(size, "m")))
+        else:
+            size = 0
 
-        countdown(5)
-      
-      if size > limit: # once we learn enough start submissions and replies  
-        log.info('database size is big enough')
+        if size < MAIN_DB_MIN_SIZE:  # learn faster early on
+            log.info("fast learning")
+            learn()
+            try:
+                log.info("new db size: " + str(bytesto(os.path.getsize(MAIN_DB), "m")))
+            except:
+                pass
 
-        if prob(0.02): # 2% chance we reply to someone
-          log.info('making a random reply')
-          reddit.random_reply()
+            countdown(5)
 
-        if prob(0.02): # 1% chance we make a random submission
-          log.info('making a submission')
-          reddit.random_submission()
+        if (
+            size > MAIN_DB_MIN_SIZE
+        ):  # once we learn enough start submissions and replies
+            log.info("database size is big enough")
 
-        if prob(0.01): # chance we'll learn more 
-          log.info('going to learn')
-          learn()
-        
-        if prob(0.02): # 5% chance we'll delete previous comments with negative upvote
-          log.info('going to clean up "bad" comments')
-          reddit.delete_comments()
-        
-        # Wait 10 minutes to comment and post because of reddit rate limits
-        countdown(1)
-      log.info('end main loop')
+            for name, action in reddit_bot.items():
+                time_diff_since_limit = int(time.time()) - RATE_LIMIT  # seconds
+                if time_diff_since_limit != 0:
+                    countdown(NEED_TO_WAIT)
+                    break
+                # reset
+                NEED_TO_WAIT = 0
+                try:
+                    if prob(action[1]):
+                        log.info("making a random {}".format(name))
+                        action[0]()
+                except praw.exceptions.APIException as e:
+                    log.info("was unable to {} - {}".format(name, e))
+                    NEED_TO_WAIT = get_seconds_to_wait(str(e))
+            if prob(PROBABILITIES["LEARN"]):  # chance we'll learn more
+                log.info("going to learn")
+                learn()
+
+            # Wait 10 minutes to comment and post because of reddit rate limits
+            countdown(1)
+        log.info("end main loop")
