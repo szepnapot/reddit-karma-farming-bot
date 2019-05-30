@@ -70,7 +70,7 @@ if __name__ == "__main__":
         ):  # once we learn enough start submissions and replies
             log.info("database size is big enough")
 
-            for action in reddit_bot_action:
+            for action in reddit_bot:
                 if action.rate_limit_unlock_epoch != 0:
                     if action.rate_limit_unlock_epoch > get_current_epoch():
                         log.info(
