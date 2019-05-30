@@ -97,6 +97,10 @@ if __name__ == "__main__":
                                     action.name, secs_to_wait
                                 )
                             )
+                        except Exception as e:
+                            log.error(
+                                "something weird happened, {}".format(e), exc_info=False
+                            )
             if prob(PROBABILITIES["LEARN"]):  # chance we'll learn more
                 log.info("going to learn")
                 learn()

@@ -165,13 +165,14 @@ def delete_comments():
             )
             try:
                 comment.delete()
+            except praw.exceptions.APIException as e:
+                raise e
             except Exception as e:
                 log.info(
                     "unable to delete comment(id={id}), skip...\n{error}".format(
                         id=comment.id, error=e.message
                     )
                 )
-                raise e
             count += 1
     log.info(
         "deleted {number} comments with less than {threshold} vote".format(
@@ -234,10 +235,10 @@ def random_submission():
 
             # Submit the same content to the same subreddit. Prepare your salt picks
             api.subreddit(rand_sub.subreddit.display_name).submit(**params)
+        except praw.exceptions.APIException as e:
+            raise e
         except Exception as e:
             log.info(e)
-            raise e
-
     else:
         log.error("something broke")
 
@@ -272,7 +273,7 @@ def random_reply():
             submission.reply(response)
             log.info("Replied to Title: {}".format(submission.title))
             log.info("Replied with: {}".format(response))
-
+    except praw.exceptions.APIException as e:
+        raise e
     except Exception as e:
         log.error(e, exc_info=False)
-        raise e
