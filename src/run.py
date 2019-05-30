@@ -15,6 +15,8 @@ from utils import (
     check_internet,
     MAIN_DB_MIN_SIZE,
     get_seconds_to_wait,
+    reddit_bot_action,
+    get_current_epoch,
 )
 from learn import learn
 from logger import log
@@ -34,11 +36,11 @@ NEED_TO_WAIT = 0
 log.info("------------new bot run--------------")
 log.info("user is " + str(reddit.api.user.me()))
 
-reddit_bot = {
-    "reply": (reddit.random_reply, PROBABILITIES["REPLY"]),
-    "submit": (reddit.random_submission, PROBABILITIES["SUBMISSION"]),
-    "delete": (reddit.delete_comments, PROBABILITIES["DELETE"]),
-}
+reddit_bot = [
+    RedditBotAction("reply", reddit.random_reply, PROBABILITIES["REPLY"], 0),
+    RedditBotAction("submit", reddit.random_submission, PROBABILITIES["SUBMISSION"], 0),
+    RedditBotAction("delete", reddit.delete_comments, PROBABILITIES["DELETE"], 0),
+]
 
 
 if __name__ == "__main__":
@@ -66,24 +68,33 @@ if __name__ == "__main__":
         ):  # once we learn enough start submissions and replies
             log.info("database size is big enough")
 
-            for name, action in reddit_bot.items():
-                # wait if we hit the limit recently
-                time_diff_since_limit = int(time.time()) - RATE_LIMIT  # seconds
-                _need_to_wait = NEED_TO_WAIT - time_diff_since_limit
-                if _need_to_wait > 0:
-                    countdown(_need_to_wait)
-                    break
-                # reset
-                NEED_TO_WAIT = 0
-                RATE_LIMIT = 0
-                try:
-                    if prob(action[1]):
+            for action in reddit_bot_action:
+                if action.rate_limit_unlock_epoch != 0:
+                    if action.rate_limit_unlock_epoch > get_current_epoch():
+                        log.info(
+                            "{} hit RateLimit recently we need to wait {} seconds with this".format(
+                                action.name,
+                                action.rate_limit_unlock_epoch - get_current_epoch(),
+                            )
+                        )
+                        continue
+                    else:
+                        action.rate_limit_unlock_epoch = 0
+                else:
+                    if prob(action.probability):
                         log.info("making a random {}".format(name))
-                        action[0]()
-                except praw.exceptions.APIException as e:
-                    log.info("was unable to {} - {}".format(name, e))
-                    RATE_TIMIT = int(time.time())
-                    NEED_TO_WAIT = get_seconds_to_wait(str(e))
+                        try:
+                            action.action()
+                        except praw.exceptions.APIException as e:
+                            secs_to_wait = get_seconds_to_wait(str(e))
+                            action.rate_limit_unlock_epoch = (
+                                get_current_epoch() + secs_to_wait
+                            )
+                            log.info(
+                                "{} hit RateLimit, need to sleep for {} seconds".format(
+                                    action.name, secs_to_wait
+                                )
+                            )
             if prob(PROBABILITIES["LEARN"]):  # chance we'll learn more
                 log.info("going to learn")
                 learn()

@@ -28,6 +28,14 @@ subreddit = collections.namedtuple(
     "Subreddit", ["name", "rank", "url", "subscribers", "type"]
 )
 
+reddit_bot_action = collections.namedtuple(
+    "RedditBotAction", ["name", "action", "probability", "rate_limit_unlock_epoch"]
+)
+
+
+def get_current_epoch():
+    return int(time.time())
+
 
 def check_internet(host="1.1.1.1", port=53, timeout=5):
     """

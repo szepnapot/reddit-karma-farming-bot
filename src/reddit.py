@@ -171,6 +171,7 @@ def delete_comments():
                         id=comment.id, error=e.message
                     )
                 )
+                raise e
             count += 1
     log.info(
         "deleted {number} comments with less than {threshold} vote".format(
@@ -235,6 +236,7 @@ def random_submission():
             api.subreddit(rand_sub.subreddit.display_name).submit(**params)
         except Exception as e:
             log.info(e)
+            raise e
 
     else:
         log.error("something broke")
@@ -273,3 +275,4 @@ def random_reply():
 
     except Exception as e:
         log.error(e, exc_info=False)
+        raise e
