@@ -4,6 +4,7 @@
 import praw
 import reddit
 import os
+import time
 from utils import (
     bytesto,
     countdown,
@@ -66,18 +67,22 @@ if __name__ == "__main__":
             log.info("database size is big enough")
 
             for name, action in reddit_bot.items():
+                # wait if we hit the limit recently
                 time_diff_since_limit = int(time.time()) - RATE_LIMIT  # seconds
-                if time_diff_since_limit != 0:
-                    countdown(NEED_TO_WAIT)
+                _need_to_wait = NEED_TO_WAIT - time_diff_since_limit
+                if _need_to_wait > 0:
+                    countdown(_need_to_wait)
                     break
                 # reset
                 NEED_TO_WAIT = 0
+                RATE_LIMIT = 0
                 try:
                     if prob(action[1]):
                         log.info("making a random {}".format(name))
                         action[0]()
                 except praw.exceptions.APIException as e:
                     log.info("was unable to {} - {}".format(name, e))
+                    RATE_TIMIT = int(time.time())
                     NEED_TO_WAIT = get_seconds_to_wait(str(e))
             if prob(PROBABILITIES["LEARN"]):  # chance we'll learn more
                 log.info("going to learn")
