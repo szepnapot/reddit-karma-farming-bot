@@ -84,7 +84,7 @@ if __name__ == "__main__":
                         action.rate_limit_unlock_epoch = 0
                 else:
                     if prob(action.probability):
-                        log.info("making a random {}".format(name))
+                        log.info("making a random {}".format(action.name))
                         try:
                             action.action()
                         except praw.exceptions.APIException as e:
