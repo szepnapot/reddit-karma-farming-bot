@@ -61,7 +61,11 @@ def _pushshift_search(sub, start, end):
     :return: iterable of reddit submissions (List[dict])
     """
     url = SUBMISSION_SEARCH_TEMPLATE.format(after=start, before=end, subreddit=sub)
-    return requests.get(url).json().get("data", [])
+    try:
+        return requests.get(url).json().get("data", [])
+    except Exception as e:
+        # unable to get data from pushshift
+        return None
 
 
 @lru_cache(timeout=DAY)
@@ -201,9 +205,7 @@ def random_submission():
         tops = get_submissions(SD, ED, sub.name)
         big_upvote_posts = list(filter(lambda item: item["score"] >= MIN_SCORE, tops))
         log.info(
-            "found {} posts with score >= {} | time range {}".format(
-                len(big_upvote_posts), MIN_SCORE, DATE_DIFF
-            )
+            "found {} posts with score >= {}".format(len(big_upvote_posts), MIN_SCORE)
         )
 
     log.info(big_upvote_posts[0])
