@@ -1,25 +1,27 @@
 FROM phusion/baseimage:0.11
 
-# Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]
 WORKDIR /reddit-karma-bot
 SHELL ["/bin/bash", "-c"]
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-		g++ \
-		gcc \
-    golang-go \
-		libc6-dev \
-		make \
-		pkg-config \
-    wget \
-    tmux \
-    python2.7 \
-    python-pip \
-    python-setuptools \
-    python-dev \
-    git \
-    ca-certificates
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+  		g++ \
+  		gcc \
+      golang-go \
+  		libc6-dev \
+  		make \
+  		pkg-config \
+      wget \
+      tmux \
+      python2.7 \
+      python-pip \
+      python-setuptools \
+      python-dev \
+      git \
+      ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # set up gotty
 RUN mkdir -p /tmp/gotty \
@@ -30,12 +32,9 @@ RUN mkdir -p /tmp/gotty \
 
 ### set up bot
 ADD ./src/requirements.txt requirements.txt
-RUN pip install wheel
 RUN pip install --upgrade pip wheel -r requirements.txt
 COPY ./src /reddit-karma-bot-src
 
-# clean up APT
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 # run it
 ENTRYPOINT [ "/bin/bash" ]
 CMD [ "/reddit-karma-bot-src/run.sh" ]
