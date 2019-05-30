@@ -32,6 +32,7 @@ RUN mkdir -p /tmp/gotty \
 
 ### set up bot
 ADD ./src/requirements.txt requirements.txt
+RUN pip install wheel
 RUN pip install --upgrade pip wheel -r requirements.txt
 COPY ./src /reddit-karma-bot-src
 
