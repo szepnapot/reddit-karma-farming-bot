@@ -5,8 +5,8 @@ import random
 import os
 import functools
 import socket
+import collections
 from requests import get
-from collections import namedtuple
 from os.path import expanduser
 from logger import log
 
@@ -24,7 +24,7 @@ DAY = 86400  # POSIX day (exact value)
 PROBABILITIES = {"REPLY": 0.02, "SUBMISSION": 0.02, "LEARN": 0.01, "DELETE": 0.02}
 
 
-subreddit = namedtuple(
+subreddit = collections.namedtuple(
     "Subreddit", ["name", "rank", "url", "subscribers", "type", "time_retrieved"]
 )
 
