@@ -25,7 +25,7 @@ PROBABILITIES = {"REPLY": 0.02, "SUBMISSION": 0.02, "LEARN": 0.01, "DELETE": 0.0
 
 
 subreddit = collections.namedtuple(
-    "Subreddit", ["name", "rank", "url", "subscribers", "type", "time_retrieved"]
+    "Subreddit", ["name", "rank", "url", "subscribers", "type"]
 )
 
 
