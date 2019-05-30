@@ -81,7 +81,7 @@ if __name__ == "__main__":
                         )
                         continue
                     else:
-                        action.rate_limit_unlock_epoch = 0
+                        action._replace(rate_limit_unlock_epoch=0)
                 else:
                     if prob(action.probability):
                         log.info("making a random {}".format(action.name))
@@ -89,8 +89,10 @@ if __name__ == "__main__":
                             action.action()
                         except praw.exceptions.APIException as e:
                             secs_to_wait = get_seconds_to_wait(str(e))
-                            action.rate_limit_unlock_epoch = (
-                                get_current_epoch() + secs_to_wait
+                            action._replace(
+                                rate_limit_unlock_epoch=(
+                                    get_current_epoch() + secs_to_wait
+                                )
                             )
                             log.info(
                                 "{} hit RateLimit, need to sleep for {} seconds".format(
