@@ -6,12 +6,12 @@ SHELL ["/bin/bash", "-c"]
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-  		g++ \
-  		gcc \
+      g++ \
+      gcc \
       golang-go \
-  		libc6-dev \
-  		make \
-  		pkg-config \
+      libc6-dev \
+      make \
+      pkg-config \
       wget \
       tmux \
       python2.7 \
@@ -28,7 +28,7 @@ RUN mkdir -p /tmp/gotty \
   && GOPATH=/tmp/gotty go get github.com/yudai/gotty \
   && mv /tmp/gotty/bin/gotty /usr/local/bin/ \
   && rm -rf /tmp/gotty \
-	&& openssl req -x509 -nodes -days 9999 -subj "/C=US/ST=CA/O=Acme, Inc." -newkey rsa:2048 -keyout ~/.gotty.key -out ~/.gotty.crt
+  && openssl req -x509 -nodes -days 9999 -subj "/C=US/ST=CA/O=Acme, Inc." -newkey rsa:2048 -keyout ~/.gotty.key -out ~/.gotty.crt
 
 ### set up bot
 ADD ./src/requirements.txt requirements.txt
